@@ -1,6 +1,7 @@
 /******************************************
  * Haunted Tree Header File				  *
- * Author: Aman Karunakaran				  *
+ * Authors: Aman Karunakaran			  *
+ *			Kurt Ayalp					  *
  * Last Modified: 5/14/17				  *
  ******************************************/
 #include <iostream>
@@ -28,29 +29,14 @@ class Tree {
 		}
 
 		~Tree() {
-			Node<T>* itr = this->root;
-			while(itr) {
-				if(itr->left) {
-					itr = itr->left;
-					continue;
-				}
-				if(itr->right) {
-					itr = itr->right;
-					continue;
-				}
-				Node<T>* toDel = itr;
-				itr = itr->parent;
-				if(itr->right == toDel) itr->right = 0;
-				else itr->left = 0;
-				delete toDel;
-			}
+			destroy_node(root);
 		}
 
 		void add(const T& elt) {
 			Node<T>* itr = root;
 			bool left;
 			if(!itr) {
-				root = new Node<T>{elt, 0, 0, 0, 0, 0};
+				root = new Node<T>{elt, 0, 0, 0, 0, 0, 0};
 				return;
 			}
 			if(itr->datum > elt) left = true;
@@ -61,8 +47,8 @@ class Tree {
 				if(itr->datum > elt) left = true;
 				else left = false;
 			}
-			if(left) itr->left = new Node<T>{elt, 0, 0, itr, 0, 0};
-			else itr->right = new Node<T>{elt, 0, 0, itr, 0, 0};
+			if(left) itr->left = new Node<T>{elt, 0, 0, 0, itr, 0, 0};
+			else itr->right = new Node<T>{elt, 0, 0, 0, itr, 0, 0};
 			fixUp(itr);
 		}
 
@@ -81,13 +67,19 @@ class Tree {
 
 		T& median() {
 			Node<T>* itr = root;
-	        double sum = itr->leftSubtreeSize + itr->rightSubtreeSize + (itr->weight)*(itr->datum);
-	        while(leftSubtreeSize >= sum/2 || rightSubtreeSize > sum/2) {
-	            if(leftSubtreeSize < sum/2) itr = itr->right;
-	            else itr = itr->left;
-	            sum = itr->leftSubtreeSize + itr->rightSubtreeSize + (itr->weight)*(itr->datum);
-	        }
-        	return itr->datum;
+		    double sum = itr->leftSubtreeSize + itr->rightSubtreeSize + itr->weight;
+		    double leftElts = 0, rightElts = 0;
+		    while(leftElts + itr->leftSubtreeSize >= sum/2 || rightElts + itr->rightSubtreeSize > sum/2) {
+		        if((leftElts + itr->leftSubtreeSize) < sum/2) {
+		            leftElts += itr->weight + itr->leftSubtreeSize;
+		            itr = itr->right;
+		        }
+		        else {
+		            rightElts += itr->weight + itr->rightSubtreeSize;
+		            itr = itr->left;
+		        }
+		    }
+		    return itr->datum;
 		}
 
 	private:
@@ -107,6 +99,15 @@ class Tree {
 			if(t == 1) std::cout << n->datum << " ";
 			print_h(n->right, t);
 			if(t == 2) std::cout << n->datum << " ";
+		}
+
+		void destroy_node(Node<T>* node) {
+			if (node == nullptr) {
+	            return;
+	        }
+	        destroy_node(node->left);
+	        destroy_node(node->right);
+	        delete node;
 		}
 };
 
@@ -130,22 +131,7 @@ class HauntedTree {
 		}
 
 		~HauntedTree() {
-			Node<T>* itr = this->root;
-			while(itr) {
-				if(itr->left) {
-					itr = itr->left;
-					continue;
-				}
-				if(itr->right) {
-					itr = itr->right;
-					continue;
-				}
-				Node<T>* toDel = itr;
-				itr = itr->parent;
-				if(itr->right == toDel) itr->right = 0;
-				else itr->left = 0;
-				delete toDel;
-			}
+			destroy_node(root);
 		}
 
 		int size() {
@@ -281,5 +267,14 @@ class HauntedTree {
 				if(n->ghost) std::cout << "g ";
 				else std::cout << n->datum << " ";
 			}
+		}
+
+		void destroy_node(Node<T>* node) {
+			if (node == nullptr) {
+	            return;
+	        }
+	        destroy_node(node->left);
+	        destroy_node(node->right);
+	        delete node;
 		}
 };
