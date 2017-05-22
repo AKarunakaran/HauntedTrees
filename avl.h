@@ -1,7 +1,6 @@
 #include <vector>
 #include <utility>
 #include <functional>
-#include <iostream>
 
 // probably useful
 int max(int x, int y) {
@@ -10,6 +9,7 @@ int max(int x, int y) {
 
 template <typename T>
 class AVL {
+friend class HauntedTree<T, AVL<T> >;
 public:
     template <typename D>
     struct Node {
@@ -55,10 +55,6 @@ public:
             }
         }
         return itr->datum;
-    }
-
-    const Node<T>* search(T& datum, bool print_path = false) const {
-        return search_node(root, datum, print_path);
     }
 
     void merge(AVL<T>& other, Node<T>* root) {
@@ -110,36 +106,6 @@ private:
             }
         }
         return node;
-    }
-
-    // search_node returns the node, or nullptr
-    const Node<T>* search_node(const Node<T>* node, T& datum, bool print_path) const {
-        if (node == nullptr) {
-            if (print_path) {
-                std::cout << "M" << std::endl;
-            }
-            return nullptr; // not found (no node here)
-        }
-        if (node->datum == datum) {
-            // found the target
-            if (print_path) {
-                std::cout << "X" << std::endl;
-            }
-            return node;
-        }
-        if (datum < node->datum) {
-            // left subtree, since smaller than current node
-            if (print_path) {
-                std::cout << "L";
-            }
-            return search_node(node->left, datum, print_path);
-        } else {
-            if (print_path) {
-                std::cout << "R";
-            }
-            // right subtree, since larger than current node
-            return search_node(node->right, datum, print_path);
-        }
     }
 
     // these return the new top node after rotation
