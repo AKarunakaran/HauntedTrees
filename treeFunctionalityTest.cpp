@@ -1,4 +1,5 @@
 #include "hauntedTrees.h"
+#include "basicTree.h"
 #include "avl.h"
 #include <iostream>
 using namespace std;
