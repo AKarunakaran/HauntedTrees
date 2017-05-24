@@ -1,6 +1,7 @@
 #include <vector>
 #include <utility>
 #include <functional>
+#include <iostream>
 
 // probably useful
 int max(int x, int y) {
@@ -45,6 +46,7 @@ class AVL {
             double sum = itr->leftSubtreeSize + itr->rightSubtreeSize + itr->weight;
             double leftElts = 0, rightElts = 0;
             while(leftElts + itr->leftSubtreeSize >= sum/2 || rightElts + itr->rightSubtreeSize > sum/2) {
+                std::cout << sum << " " << leftElts + itr->leftSubtreeSize << " " << rightElts + itr->rightSubtreeSize << std::endl;
                 if((leftElts + itr->leftSubtreeSize) < sum/2) {
                     leftElts += itr->weight + itr->leftSubtreeSize;
                     itr = itr->right;
@@ -54,6 +56,7 @@ class AVL {
                     itr = itr->left;
                 }
             }
+            std::cout << sum << " " << leftElts + itr->leftSubtreeSize << " " << rightElts + itr->rightSubtreeSize << std::endl;
             return itr->datum;
         }
 

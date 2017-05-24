@@ -5,65 +5,39 @@ using namespace std;
 
 int main() {
 	Tree<int> t;
-	t.add(3);
-	t.add(6);
-	t.add(7);
-	t.add(1);
-	t.add(2);
-	t.add(10);
-	t.add(0);
+	t.add(3, 1);
+	t.add(6, 1);
+	t.add(7, 1);
+	t.add(1, 1);
+	t.add(2, 1);
+	t.add(10, 1);
+	t.add(0, 1);
 	t.print();
 	cout << endl;
 	
 	HauntedTree<int, Tree<int> > h(&t);
+	AVL<int> avl;
 	h.add(0);
-	cout << h.median() << endl;
-	h.add(10);
-	cout << h.median() << endl;
+	avl.add(0, 1);
+	cout << h.median() << " " << avl.median() << endl;
 	h.add(3);
-	cout << h.median() << endl;
-	h.add(7);
-	cout << h.median() << endl;
-	h.add(1);
-	cout << h.median() << endl;
+	avl.add(3, 1);
+	cout << h.median() << " " << avl.median() << endl;
+	h.add(10);
+	avl.add(10, 1);
+	cout << h.median() << " " << avl.median() << endl;
 	h.add(2);
-	cout << h.median() << endl;
+	avl.add(2, 1);
+	cout << h.median() << " " << avl.median() << endl;
+	h.add(1);
+	avl.add(1, 1);
+	cout << h.median() << " " << avl.median() << endl;
+	h.add(7);
+	avl.add(7, 1);
+	cout << h.median() << " " << avl.median() << endl;
 	h.add(6);
-	cout << h.median() << endl;
-
-	/*HauntedTree<int, Tree<int> > h2(&t), h3(&t);
-	h2.add(0);
-	h2.add(2);
-	h3.add(6);
-	h3.add(10);
-	h2.print();
-	cout << endl;
-	h3.print();
-	cout << endl;
-	h2.treeUnion(&h3);
-	h2.print();
-	h2.add(3);
-	h2.add(7);
-	h2.print();*/
-
-	AVL<double> avl, avl2;
-	avl.add(.1, .1);
-	avl.add(.35, .35);
-	avl.add(.05, .05);
-	avl.add(.1, .1);
-	avl.add(.15, .15);
-	avl.add(.05, .05);
-	avl.add(.2, .2);
-	cout << avl.median() << endl;
-
-	avl2.add(.1, 1);
-	avl2.add(.35, 1);
-	avl2.add(.05, 1);
-	avl2.add(.1, 1);
-	avl2.add(.15, 1);
-	avl2.add(.05, 1);
-	avl2.add(.2, 1);
-	cout << avl2.median() << endl;
+	avl.add(6, 1);
+	cout << h.median() << " " << avl.median() << endl;
 
 	return 0;
 }
