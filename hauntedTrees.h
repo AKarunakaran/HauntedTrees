@@ -78,6 +78,7 @@ class HauntedTree {
 					}
 				}
 			}
+			//TODO: figure out what to do if there are duplicates in the base tree.
 			if(!itr->ghost) {
 				//
 			}
@@ -164,26 +165,14 @@ class HauntedTree {
 		void print_h(Node<T>* n, int t) {
 			if(!n)
 				return;
-			if(t == 0) {
-				if(n->ghost)
-					std::cout << "g ";
-				else
-					std::cout << n->datum << " ";
-			}
+			if(t == 0)
+				std::cout << ((n->ghost) ? "g" : n->datum) << " ";
 			print_h(n->left, t);
-			if(t == 1) {
-				if(n->ghost)
-					std::cout << "g ";
-				else
-					std::cout << n->datum << " ";
-			}
+			if(t == 1)
+				std::cout << ((n->ghost) ? "g" : n->datum) << " ";
 			print_h(n->right, t);
-			if(t == 2) {
-				if(n->ghost)
-					std::cout << "g ";
-				else
-					std::cout << n->datum << " ";
-			}
+			if(t == 2) 
+				std::cout << ((n->ghost) ? "g" : n->datum) << " ";
 		}
 
 		void destroy_node(Node<T>* node) {

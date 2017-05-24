@@ -96,8 +96,7 @@ class Tree {
 		}
 
 		void print_h(Node<T>* n, int t) {
-			if(!n)
-				return;
+			if(!n) return;
 			if(t == 0) std::cout << n->datum << " ";
 			print_h(n->left, t);
 			if(t == 1) std::cout << n->datum << " ";
