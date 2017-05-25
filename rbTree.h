@@ -6,6 +6,9 @@
  ******************************************/
 #include <iostream>
 
+#define RED true
+#define BLACK false
+
 template <typename T>
 class RedBlack {
     friend class HauntedTree<T, RedBlack<T> >;
@@ -19,7 +22,7 @@ class RedBlack {
             Node* parent;
             Node* left;
             Node* right;
-            bool red;
+            bool color;
         };
 
         void add(T datum, double weight) {
@@ -28,7 +31,7 @@ class RedBlack {
                 par = itr;
                 itr = (datum < itr->datum) ? itr->left : itr->right;
             }
-            Node<T>* toAdd = new Node<T>{datum, weight, 0, 0, par, 0, 0, true};
+            Node<T>* toAdd = new Node<T>{datum, weight, 0, 0, par, 0, 0, RED};
             if(!par)
                 root = toAdd;
             else if(datum < par->datum)
@@ -36,7 +39,7 @@ class RedBlack {
             else
                 par->right = toAdd;
             if(toAdd == root)
-                root->red = false;
+                root->color = BLACK;
             else
                 fixUp(toAdd);
         }
@@ -86,40 +89,40 @@ class RedBlack {
         Node<T>* root = nullptr;
 
         void fixUp(Node<T>* node) {
-            while(node != root && node->parent->red) {
+            while(node != root && node->parent->color == RED) {
                 if(node->parent == node->parent->parent->left) {
                     Node<T>* uncle = node->parent->parent->right;
-                    if(uncle->red) {
-                        node->parent->red = false;
-                        uncle->red = false;
+                    if(uncle->color == RED) {
+                        node->parent->color = BLACK;
+                        uncle->color = BLACK;
                         node = node->parent->parent;
-                        node->red = true;
+                        node->color = RED;
                     } else if(node == node->parent->right) {
                         node = node->parent;
                         rotateLeft(node);
                     } else {
-                        node->parent->red = false;
-                        node->parent->parent->red = true;
+                        node->parent->color = BLACK;
+                        node->parent->parent->color = RED;
                         rotateRight(node->parent->parent);
                     }
                 } else {
                     Node<T>* uncle = node->parent->parent->left;
-                    if(uncle->red) {
-                        node->parent->red = false;
-                        uncle->red = false;
+                    if(uncle->color) {
+                        node->parent->color = BLACK;
+                        uncle->color = BLACK;
                         node = node->parent->parent;
-                        node->red = true;
+                        node->color = RED;
                     } else if(node == node->parent->left) {
                         node = node->parent;
                         rotateRight(node);
                     } else {
-                        node->parent->red = false;
-                        node->parent->parent->red = true;
+                        node->parent->color = BLACK;
+                        node->parent->parent->color = RED;
                         rotateLeft(node->parent->parent);
                     }
                 }
             }
-            root->red = false;
+            root->color = BLACK;
         }
 
         void rotateLeft(Node<T>* node) {
@@ -169,10 +172,10 @@ class RedBlack {
 
         void print_h(Node<T>* n, int t) {
             if(!n) return;
-            if(t == 0) std::cout << n->datum << ((n->red) ? "r" : "b") << " ";
+            if(t == 0) std::cout << n->datum << ((n->color == RED) ? "r" : "b") << " ";
             print_h(n->left, t);
-            if(t == 1) std::cout << n->datum << ((n->red) ? "r" : "b") << " ";
+            if(t == 1) std::cout << n->datum << ((n->color == RED) ? "r" : "b") << " ";
             print_h(n->right, t);
-            if(t == 2) std::cout << n->datum << ((n->red) ? "r" : "b") << " ";
+            if(t == 2) std::cout << n->datum << ((n->color == RED) ? "r" : "b") << " ";
         }
 };
