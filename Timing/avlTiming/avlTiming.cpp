@@ -37,13 +37,9 @@ void generateData(vector<dataPoint>& data, bool weighted) {
 }
 
 void merge(vector<levelSet>& levelSets) {
-	cout << "Test1" << endl;
 	levelSets[levelSets.size()-2].avlTree->treeUnion(levelSets[levelSets.size()-1].avlTree);
-	cout << "Test2" << endl;
 	levelSets.pop_back();
-	cout << "Test3" << endl;
 	levelSets.back().median = levelSets.back().avlTree->median();
-	cout << "Test4" << endl;
 }
 
 void process(int n, bool weighted) {
@@ -51,11 +47,6 @@ void process(int n, bool weighted) {
 	vector<levelSet> levelSets;
 
 	generateData(data, weighted);
-
-	for(int i = 0; i < n; ++i) {
-		cout << data[i].value << "\t";
-	}
-	cout << endl;
 
 	for(int i = 0; i < n; ++i) {
 		AVL<int>* avlToAdd = new AVL<int>;
@@ -96,7 +87,7 @@ int main() {
 	nextAVLfile(file);
 	ofstream outFS(file);
 
-	for(int i = 30; i < 1000000; i += 1000) {
+	for(int i = 30; i <= 300030; i += 1000) {
 		for(int j = 0; j < 10000; ++j)
 			cacheFlush[j] = j;
 		clock_t begin = clock();

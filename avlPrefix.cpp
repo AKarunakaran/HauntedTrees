@@ -32,12 +32,14 @@ int main() {
 
 	//Regression algorithm
 	for(int i = 0; i < n; ++i) {
+		cout << i << "\t";
 		AVL<int>* avlToAdd = new AVL<int>;
 		avlToAdd->add(data[i], 1);
 		levelSets.push_back({avlToAdd, data[i], i});
 		while(levelSets.size() > 1 && levelSets[levelSets.size()-1].median <= levelSets[levelSets.size()-2].median) {
 			merge(levelSets);
 		}
+		cout << endl;
 	}
 
 	for(int i = 0; i < levelSets.size(); ++i) {

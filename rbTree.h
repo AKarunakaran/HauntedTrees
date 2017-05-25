@@ -2,7 +2,7 @@
  * Red-Black Tree Header File             *
  * Authors: Aman Karunakaran              *
  *          Kurt Ayalp                    *
- * Last Modified: 5/24/17                 *
+ * Last Modified: 5/25/17                 *
  ******************************************/
 #include <iostream>
 
@@ -49,7 +49,7 @@ class RedBlack {
             Node<T>* itr = root;
             double sum = itr->leftSubtreeSize + itr->rightSubtreeSize + itr->weight;
             double leftElts = 0, rightElts = 0;
-            while(leftElts + itr->leftSubtreeSize >= sum/2 || rightElts + itr->rightSubtreeSize > sum/2) {
+            while(leftElts + itr->leftSubtreeSize > sum/2 || rightElts + itr->rightSubtreeSize > sum/2) {
                 if((leftElts + itr->leftSubtreeSize) < sum/2) {
                     leftElts += itr->weight + itr->leftSubtreeSize;
                     itr = itr->right;
@@ -70,7 +70,6 @@ class RedBlack {
             if(node->left) merge(other, node->left);
             if(node->right) merge(other, node->right);
             this->add(node->datum, node->weight);
-            other->destroy_node(node);
         }
 
         ~RedBlack() {
