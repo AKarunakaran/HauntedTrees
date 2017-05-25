@@ -32,16 +32,17 @@ class RedBlack {
                 itr = (datum < itr->datum) ? itr->left : itr->right;
             }
             Node<T>* toAdd = new Node<T>{datum, weight, 0, 0, par, 0, 0, RED};
-            if(!par)
-                root = toAdd;
-            else if(datum < par->datum)
-                par->left = toAdd;
-            else
-                par->right = toAdd;
-            if(toAdd == root)
-                root->color = BLACK;
-            else
+            if(par) {
+                if(datum < par->datum)
+                    par->left = toAdd;
+                else
+                    par->right = toAdd;
+                fixUpWeight(par);
                 fixUp(toAdd);
+            } else {
+                root = toAdd;
+                root->color = BLACK;
+            }
         }
 
         T& median() {
@@ -61,11 +62,11 @@ class RedBlack {
             return itr->datum;
         }
 
-        void treeUnion(AVL<T>* other) {
+        void treeUnion(RedBlack<T>* other) {
             this->merge(other, other->root);
         }
 
-        void merge(AVL<T>* other, Node<T>* node) {
+        void merge(RedBlack<T>* other, Node<T>* node) {
             if(node->left) merge(other, node->left);
             if(node->right) merge(other, node->right);
             this->add(node->datum, node->weight);
@@ -92,7 +93,7 @@ class RedBlack {
             while(node != root && node->parent->color == RED) {
                 if(node->parent == node->parent->parent->left) {
                     Node<T>* uncle = node->parent->parent->right;
-                    if(uncle->color == RED) {
+                    if(uncle && uncle->color == RED) {
                         node->parent->color = BLACK;
                         uncle->color = BLACK;
                         node = node->parent->parent;
@@ -107,7 +108,7 @@ class RedBlack {
                     }
                 } else {
                     Node<T>* uncle = node->parent->parent->left;
-                    if(uncle->color) {
+                    if(uncle && uncle->color == RED) {
                         node->parent->color = BLACK;
                         uncle->color = BLACK;
                         node = node->parent->parent;
@@ -123,6 +124,16 @@ class RedBlack {
                 }
             }
             root->color = BLACK;
+        }
+
+        void fixUpWeight(Node<T>* node) {
+            while(node) {
+                if(node->left)
+                    node->leftSubtreeSize = node->left->weight + node->left->leftSubtreeSize + node->left->rightSubtreeSize;
+                if(node->right)
+                    node->rightSubtreeSize = node->right->weight + node->right->leftSubtreeSize + node->right->rightSubtreeSize;
+                node = node->parent;
+            }
         }
 
         void rotateLeft(Node<T>* node) {

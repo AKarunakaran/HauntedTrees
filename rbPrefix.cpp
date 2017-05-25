@@ -2,20 +2,20 @@
 #include <iomanip>
 #include <vector>
 #include "hauntedTrees.h"
-#include "avl.h"
+#include "rbTree.h"
 using namespace std;
 
 struct levelSet {
-	AVL<int>* avlTree;
+	RedBlack<int>* rbTree;
 	int median;
 	int left;
 };
 
 //Merges current level set with previous
 void merge(vector<levelSet>& levelSets) {
-	levelSets[levelSets.size()-2].avlTree->treeUnion(levelSets[levelSets.size()-1].avlTree);
+	levelSets[levelSets.size()-2].rbTree->treeUnion(levelSets[levelSets.size()-1].rbTree);
 	levelSets.pop_back();
-	levelSets.back().median = levelSets.back().avlTree->median();
+	levelSets.back().median = levelSets.back().rbTree->median();
 }
 
 int main() {
@@ -32,9 +32,9 @@ int main() {
 
 	//Regression algorithm
 	for(int i = 0; i < n; ++i) {
-		AVL<int>* avlToAdd = new AVL<int>;
-		avlToAdd->add(data[i], 1);
-		levelSets.push_back({avlToAdd, data[i], i});
+		RedBlack<int>* rbToAdd = new RedBlack<int>;
+		rbToAdd->add(data[i], 1);
+		levelSets.push_back({rbToAdd, data[i], i});
 		while(levelSets.size() > 1 && levelSets[levelSets.size()-1].median <= levelSets[levelSets.size()-2].median) {
 			merge(levelSets);
 		}

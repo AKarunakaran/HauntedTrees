@@ -47,7 +47,7 @@ int main() {
 	avl.add(6, 1);
 	cout << h.median() << " " << avl.median() << endl;*/
 
-	RedBlack<int> rb;
+	RedBlack<int> rb, rb2;
 	rb.add(11, 1);
 	rb.print();
 	rb.add(2, 1);
@@ -66,6 +66,24 @@ int main() {
 	rb.print();
 	rb.add(4, 1);
 	rb.print();
+	cout << rb.median() << endl;
+
+	rb2.add(6, 1);
+	rb2.print();
+	rb2.add(6, 1);
+	rb2.print();
+	rb2.add(7, 1);
+	rb2.print();
+	
+	cout << rb2.median() << endl;
+
+	AVL<int> avl;
+
+	avl.add(6, 1);
+	avl.add(6, 1);
+	avl.add(7, 1);
+
+	cout << avl.median() << endl;
 
 	return 0;
 }
