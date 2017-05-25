@@ -2,8 +2,8 @@
 #include <iomanip>
 #include <vector>
 #include <fstream>
-#include "../hauntedTrees.h"
-#include "../avl.h"
+#include "../../hauntedTrees.h"
+#include "../../avl.h"
 using namespace std;
 
 struct levelSet {

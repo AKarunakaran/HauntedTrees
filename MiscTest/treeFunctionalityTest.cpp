@@ -3,10 +3,10 @@
  * Author: Aman Karunakaran				  *
  * Last Modified: 5/24/17				  *
  ******************************************/
-#include "hauntedTrees.h"
-#include "basicTree.h"
-#include "avl.h"
-#include "rbTree.h"
+#include "../hauntedTrees.h"
+#include "../basicTree.h"
+#include "../avl.h"
+#include "../rbTree.h"
 #include <iostream>
 using namespace std;
 
