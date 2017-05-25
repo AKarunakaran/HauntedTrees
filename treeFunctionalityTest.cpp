@@ -6,10 +6,12 @@
 #include "hauntedTrees.h"
 #include "basicTree.h"
 #include "avl.h"
+#include "rbTree.h"
 #include <iostream>
 using namespace std;
 
 int main() {
+	/*
 	Tree<int> t;
 	t.add(3, 1);
 	t.add(6, 1);
@@ -43,7 +45,27 @@ int main() {
 	cout << h.median() << " " << avl.median() << endl;
 	h.add(6);
 	avl.add(6, 1);
-	cout << h.median() << " " << avl.median() << endl;
+	cout << h.median() << " " << avl.median() << endl;*/
+
+	RedBlack<int> rb;
+	rb.add(11, 1);
+	rb.print();
+	rb.add(2, 1);
+	rb.print();
+	rb.add(14, 1);
+	rb.print();
+	rb.add(1, 1);
+	rb.print();
+	rb.add(7, 1);
+	rb.print();
+	rb.add(15, 1);
+	rb.print();
+	rb.add(5, 1);
+	rb.print();
+	rb.add(8, 1);
+	rb.print();
+	rb.add(4, 1);
+	rb.print();
 
 	return 0;
 }

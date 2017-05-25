@@ -121,6 +121,8 @@ class AVL {
         // these return the new top node after rotation
         Node<T>* rotate_left(Node<T>* node) {
             Node<T>* newParent = node->right;
+            if(root == node)
+                root = newParent;
             node->right = newParent->left;
             newParent->left = node;
             node->rightSubtreeSize = newParent->leftSubtreeSize;
@@ -131,6 +133,8 @@ class AVL {
         }
         Node<T>* rotate_right(Node<T>* node) {
             Node<T>* newParent = node->left;
+            if(root == node)
+                root = newParent;
             node->left = newParent->right;
             newParent->right = node;
             node->leftSubtreeSize = newParent->rightSubtreeSize;
