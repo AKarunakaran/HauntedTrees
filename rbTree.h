@@ -2,9 +2,10 @@
  * Red-Black Tree Header File             *
  * Authors: Aman Karunakaran              *
  *          Kurt Ayalp                    *
- * Last Modified: 5/25/17                 *
+ * Last Modified: 6/7/17                  *
  ******************************************/
 #include <iostream>
+#include <vector>
 
 #define RED true
 #define BLACK false
@@ -16,7 +17,8 @@ class RedBlack {
         template <typename D>
         struct Node {
             D datum;
-            double weight;
+            std::vector<double> weights;
+            double totalWeight;
             double leftSubtreeSize;
             double rightSubtreeSize;
             Node* parent;
@@ -29,33 +31,47 @@ class RedBlack {
             Node<T> *par = nullptr, *itr = root;
             while(itr) {
                 par = itr;
+                if(datum == itr->datum)
+                    break;
                 itr = (datum < itr->datum) ? itr->left : itr->right;
             }
-            Node<T>* toAdd = new Node<T>{datum, weight, 0, 0, par, 0, 0, RED};
-            if(par) {
-                if(datum < par->datum)
-                    par->left = toAdd;
-                else
-                    par->right = toAdd;
-                fixUpWeight(par);
-                fixUp(toAdd);
+            if(!par || !itr) {
+                Node<T>* toAdd = new Node<T>;
+                toAdd->datum = datum;
+                toAdd->weights.push_back(weight);
+                toAdd->totalWeight = weight;
+                toAdd->parent = par;
+                toAdd->left = toAdd->right = 0;
+                toAdd->color = RED;
+                if(par) {
+                    if(datum < par->datum)
+                        par->left = toAdd;
+                    else
+                        par->right = toAdd;
+                    fixUpWeight(par);
+                    fixUp(toAdd);
+                } else {
+                    root = toAdd;
+                    root->color = BLACK;
+                }
             } else {
-                root = toAdd;
-                root->color = BLACK;
+                itr->weights.push_back(weight);
+                itr->totalWeight += weight;
+                fixUpWeight(par);
             }
         }
 
         T& median() {
             Node<T>* itr = root;
-            double sum = itr->leftSubtreeSize + itr->rightSubtreeSize + itr->weight;
+            double sum = itr->leftSubtreeSize + itr->rightSubtreeSize + itr->totalWeight;
             double leftElts = 0, rightElts = 0;
             while(leftElts + itr->leftSubtreeSize > sum/2 || rightElts + itr->rightSubtreeSize > sum/2) {
                 if((leftElts + itr->leftSubtreeSize) < sum/2) {
-                    leftElts += itr->weight + itr->leftSubtreeSize;
+                    leftElts += itr->totalWeight + itr->leftSubtreeSize;
                     itr = itr->right;
                 }
                 else {
-                    rightElts += itr->weight + itr->rightSubtreeSize;
+                    rightElts += itr->totalWeight + itr->rightSubtreeSize;
                     itr = itr->left;
                 }
             }
@@ -69,7 +85,9 @@ class RedBlack {
         void merge(RedBlack<T>* other, Node<T>* node) {
             if(node->left) merge(other, node->left);
             if(node->right) merge(other, node->right);
-            this->add(node->datum, node->weight);
+            for(int i = 0; i < node->weights.size(); ++i) {
+                this->add(node->datum, node->weights[i]);
+            }
         }
 
         ~RedBlack() {
@@ -128,9 +146,9 @@ class RedBlack {
         void fixUpWeight(Node<T>* node) {
             while(node) {
                 if(node->left)
-                    node->leftSubtreeSize = node->left->weight + node->left->leftSubtreeSize + node->left->rightSubtreeSize;
+                    node->leftSubtreeSize = node->left->totalWeight + node->left->leftSubtreeSize + node->left->rightSubtreeSize;
                 if(node->right)
-                    node->rightSubtreeSize = node->right->weight + node->right->leftSubtreeSize + node->right->rightSubtreeSize;
+                    node->rightSubtreeSize = node->right->totalWeight + node->right->leftSubtreeSize + node->right->rightSubtreeSize;
                 node = node->parent;
             }
         }
@@ -150,7 +168,7 @@ class RedBlack {
             newParent->left = node;
             node->parent = newParent;
             node->rightSubtreeSize = newParent->leftSubtreeSize;
-            newParent->leftSubtreeSize = node->leftSubtreeSize + node->rightSubtreeSize + node->weight;
+            newParent->leftSubtreeSize = node->leftSubtreeSize + node->rightSubtreeSize + node->totalWeight;
         }
 
         void rotateRight(Node<T>* node) {
@@ -168,7 +186,7 @@ class RedBlack {
             newParent->right = node;
             node->parent = newParent;
             node->leftSubtreeSize = newParent->rightSubtreeSize;
-            newParent->rightSubtreeSize = node->leftSubtreeSize + node->rightSubtreeSize + node->weight;
+            newParent->rightSubtreeSize = node->leftSubtreeSize + node->rightSubtreeSize + node->totalWeight;
         }
 
         void destroy_node(Node<T>* node) {
@@ -182,10 +200,28 @@ class RedBlack {
 
         void print_h(Node<T>* n, int t) {
             if(!n) return;
-            if(t == 0) std::cout << n->datum << ((n->color == RED) ? "r" : "b") << " ";
+            if(t == 0) {
+                std::cout << n->datum << ((n->color == RED) ? "r" : "b") << ":{";
+                for(int i = 0; i < n->weights.size(); ++i) {
+                    std::cout << n->weights[i] << " ";
+                }
+                std::cout << "} ";
+            }
             print_h(n->left, t);
-            if(t == 1) std::cout << n->datum << ((n->color == RED) ? "r" : "b") << " ";
+            if(t == 1) {
+                std::cout << n->datum << ((n->color == RED) ? "r" : "b") << ":{";
+                for(int i = 0; i < n->weights.size(); ++i) {
+                    std::cout << n->weights[i] << " ";
+                }
+                std::cout << "} ";
+            }
             print_h(n->right, t);
-            if(t == 2) std::cout << n->datum << ((n->color == RED) ? "r" : "b") << " ";
+            if(t == 2) {
+                std::cout << n->datum << ((n->color == RED) ? "r" : "b") << ":{";
+                for(int i = 0; i < n->weights.size(); ++i) {
+                    std::cout << n->weights[i] << " ";
+                }
+                std::cout << "} ";
+            }
         }
 };

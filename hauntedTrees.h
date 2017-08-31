@@ -2,9 +2,10 @@
  * Haunted Tree Header File				  *
  * Authors: Aman Karunakaran			  *
  *			Kurt Ayalp					  *
- * Last Modified: 5/24/17				  *
+ * Last Modified: 6/7/17				  *
  ******************************************/
 #include <iostream>
+#include <vector>
 
 template <typename T, typename tree>
 class HauntedTree {
@@ -12,7 +13,8 @@ class HauntedTree {
 		template <typename D>
 		struct Node {
 			D datum;
-			double weight;
+			std::vector<std::pair<double, bool>> weights;
+			double totalWeight;
 			int leftSubtreeSize;
 			int rightSubtreeSize;
 			Node* parent;
@@ -30,84 +32,96 @@ class HauntedTree {
 			destroy_node(root);
 		}
 
-		void add(const T& elt) {
-			auto n = this->superTree->root;
-			while(n && n->datum != elt) {
-				if(n->datum > elt)
-					n = n->left;
-				else
-					n = n->right;
-			}
-			if(!n)
-				return;
-			Node<T> ghost;
-			ghost.leftSubtreeSize = ghost.rightSubtreeSize = 0;
-			ghost.left = ghost.right = 0;
-			ghost.weight = 0;
-			ghost.ghost = true;
+		void add(const T& elt, double weight) {
 			if(!this->root) {
-				Node<T>* toAdd = new Node<T>;
-				*toAdd = ghost;
-				toAdd->parent = 0;
+				Node<T>* toAdd = new Node<T>{0, std::vector<std::pair<double, bool>>{}, 0, 0, 0, 0, 0, 0, true};
 				this->root = toAdd;
 			}
+			auto superItr = this->superTree->root;
 			Node<T>* itr = this->root;
-			n = this->superTree->root;
-			while(n && n->datum != elt) {
-				if(n->datum > elt) {
-					n = n->left;
+			while(superItr->datum != elt) {
+				if(superItr->datum > elt) {
+					superItr = superItr->left;
 					if(itr->left) {
 						itr = itr->left;
 					} else {
-						Node<T>* toAdd = new Node<T>;
-						*toAdd = ghost;
-						toAdd->parent = itr;
+						Node<T>* toAdd = new Node<T>{0, std::vector<std::pair<double, bool>>{}, 0, 0, 0, itr, 0, 0, true};
 						itr->left = toAdd;
 						itr = itr->left;
 					}
 				} else {
-					n = n->right;
+					superItr = superItr->right;
 					if(itr->right) {
 						itr = itr->right;
 					} else {
-						Node<T>* toAdd = new Node<T>;
-						*toAdd = ghost;
-						toAdd->parent = itr;
+						Node<T>* toAdd = new Node<T>{0, std::vector<std::pair<double, bool>>{}, 0, 0, 0, itr, 0, 0, true};
 						itr->right = toAdd;
 						itr = itr->right;
 					}
 				}
 			}
-			//TODO: figure out what to do if there are duplicates in the base tree.
 			if(!itr->ghost) {
-				//
+				auto& itrWeights = itr->weights;
+				for(int i = 0; i < itrWeights.size(); ++i) {
+					if(!itrWeights[i].second && itrWeights[i].first == weight) {
+						itrWeights[i].second = true;
+						break;
+					}
+				}
+			} else {
+				itr->ghost = 0;
+				itr->datum = elt;
+				auto& theseWeights = itr->weights;
+				auto& superWeights = superItr->weights;
+				theseWeights.resize(superWeights.size());
+				bool added = false;
+				int i = 0;
+				while(superWeights[i] != weight) {
+					theseWeights[i].first = superWeights[i];
+					theseWeights[i].second = false;
+					++i;
+				}
+				theseWeights[i].first = superWeights[i];
+				theseWeights[i].second = true;
+				++i;
+				while(i < theseWeights.size()) {
+					theseWeights[i].first = superWeights[i];
+					theseWeights[i].second = false;
+					++i;
+				}
+				/*
+				for(int i = 0; i < theseWeights.size(); ++i) {
+					theseWeights[i].first = superWeights[i];
+					if(!added && superWeights[i] == weight) {
+						added = true;
+						theseWeights[i].second = true;
+					} else {
+						theseWeights[i].second = false;
+					}
+				}*/
 			}
-			itr->ghost = 0;
-			itr->datum = elt;
-			itr->weight = n->weight;
-			if(itr->parent)
-				fixUp(itr->parent);
+			itr->totalWeight += weight;
+			fixUp(itr->parent);
 		}
 
 		//Merges two haunted trees. Destroys other in the process.
 		void treeUnion(HauntedTree<T, tree>* other) {
 			Node<T> *thisItr = this->root, *otherItr = other->root;
 			union_h(thisItr, otherItr, 0, false);
-			delete other;
 		}
 
 		T& median() {
 			Node<T>* itr = root;
-		    double sum = itr->leftSubtreeSize + itr->rightSubtreeSize + itr->weight;
+		    double sum = itr->leftSubtreeSize + itr->rightSubtreeSize + itr->totalWeight;
 		    double leftElts = 0, rightElts = 0;
-		    while(leftElts + itr->leftSubtreeSize >= sum/2 || rightElts + itr->rightSubtreeSize > sum/2) {
+		    while(leftElts + itr->leftSubtreeSize > sum/2 || rightElts + itr->rightSubtreeSize > sum/2) {
 		    	//std::cout << sum << " " << leftElts + itr->leftSubtreeSize << " " << rightElts + itr->rightSubtreeSize << std::endl;
 		        if((leftElts + itr->leftSubtreeSize) < sum/2) {
-		            leftElts += itr->weight + itr->leftSubtreeSize;
+		            leftElts += itr->totalWeight + itr->leftSubtreeSize;
 		            itr = itr->right;
 		        }
 		        else {
-		            rightElts += itr->weight + itr->rightSubtreeSize;
+		            rightElts += itr->totalWeight + itr->rightSubtreeSize;
 		            itr = itr->left;
 		        }
 		    }
@@ -129,19 +143,19 @@ class HauntedTree {
 		tree* superTree;
 
 		void fixUp(Node<T>* node) {
-			if(node->left)
-				node->leftSubtreeSize = node->left->weight + node->left->leftSubtreeSize + node->left->rightSubtreeSize;
-			if(node->right)
-				node->rightSubtreeSize = node->right->weight + node->right->leftSubtreeSize + node->right->rightSubtreeSize;
-			if(node == root)
-				return;
-			else
-				fixUp(node->parent);
+			while(node) {
+				if(node->left)
+					node->leftSubtreeSize = node->left->totalWeight + node->left->leftSubtreeSize + node->left->rightSubtreeSize;
+				if(node->right)
+					node->rightSubtreeSize = node->right->totalWeight + node->right->leftSubtreeSize + node->right->rightSubtreeSize;
+				node = node->parent;
+			}
 		}
 
 		void union_h(Node<T>* thisItr, Node<T>* otherItr, Node<T>* thisParent, bool left) {
 			if(!otherItr)
 				return;
+
 			if(!thisItr) {
 				if(left) {
 					thisParent->left = otherItr;
@@ -154,10 +168,24 @@ class HauntedTree {
 				}
 				return;
 			}
-			if(thisItr->ghost && !otherItr->ghost) {
-				thisItr->datum = otherItr->datum;
-				thisItr->ghost = false;
+
+			if(!otherItr->ghost) {
+				if(thisItr->ghost) {
+					thisItr->datum = otherItr->datum;
+					thisItr->weights = otherItr->weights;
+					thisItr->ghost = false;
+				} else {
+					auto& otherWeights = otherItr->weights;
+					auto& theseWeights = thisItr->weights;
+					for(int i = 0; i < otherWeights.size(); ++i) {
+						if(otherWeights[i].second && !theseWeights[i].second) {
+							thisItr->totalWeight += theseWeights[i].first;
+							theseWeights[i].second = true;
+						}
+					}
+				}
 			}
+
 			union_h(thisItr->left, otherItr->left, thisItr, true);
 			union_h(thisItr->right, otherItr->right, thisItr, false);
 		}
@@ -165,14 +193,41 @@ class HauntedTree {
 		void print_h(Node<T>* n, int t) {
 			if(!n)
 				return;
-			if(t == 0)
-				std::cout << ((n->ghost) ? "g" : n->datum) << " ";
+			if(t == 0) {
+				if(n->ghost) {
+					std::cout << "g ";
+				} else {
+					std::cout << n->datum << ":{";
+					for(int i = 0; i < n->weights.size(); ++i) {
+						if(n->weights[i].second) std::cout << n->weights[i].first << " ";
+					}
+					std::cout << "} ";
+				}
+			}
 			print_h(n->left, t);
-			if(t == 1)
-				std::cout << ((n->ghost) ? "g" : n->datum) << " ";
+			if(t == 1) {
+				if(n->ghost) {
+					std::cout << "g ";
+				} else {
+					std::cout << n->datum << ":{";
+					for(int i = 0; i < n->weights.size(); ++i) {
+						if(n->weights[i].second) std::cout << n->weights[i].first << " ";
+					}
+					std::cout << "} ";
+				}
+			}
 			print_h(n->right, t);
-			if(t == 2) 
-				std::cout << ((n->ghost) ? "g" : n->datum) << " ";
+			if(t == 2)  {
+				if(n->ghost) {
+					std::cout << "g ";
+				} else {
+					std::cout << n->datum << ":{";
+					for(int i = 0; i < n->weights.size(); ++i) {
+						if(n->weights[i].second) std::cout << n->weights[i].first << " ";
+					}
+					std::cout << "} ";
+				}
+			}
 		}
 
 		void destroy_node(Node<T>* node) {

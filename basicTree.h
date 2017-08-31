@@ -2,9 +2,10 @@
  * Basic Tree Header File				  *
  * Authors: Aman Karunakaran			  *
  *			Kurt Ayalp					  *
- * Last Modified: 5/24/17				  *
+ * Last Modified: 6/7/17				  *
  ******************************************/
 #include <iostream>
+#include <vector>
 
 template <typename T>
 class Tree {
@@ -13,7 +14,8 @@ class Tree {
 		template <typename D>
 		struct Node {
 			D datum;
-			double weight;
+			std::vector<double> weights;
+			double totalWeight;
 			double leftSubtreeSize;
 			double rightSubtreeSize;
 			Node* parent;
@@ -33,19 +35,58 @@ class Tree {
 			Node<T>* itr = root;
 			bool left;
 			if(!itr) {
-				root = new Node<T>{elt, weight, 0, 0, 0, 0, 0};
+				root = new Node<T>;
+				root->datum = elt;
+				root->weights.push_back(weight);
+				root->totalWeight = weight;
 				return;
 			}
-			if(itr->datum > elt) left = true;
-			else left = false;
-			while((left && itr->left) || (!left && itr->right)) {
-				if(left) itr = itr->left;
-				else itr = itr->right;
-				if(itr->datum > elt) left = true;
-				else left = false;
+			if(itr->datum == elt) {
+				itr->weights.push_back(weight);
+				itr->totalWeight += weight;
+				return;
 			}
-			if(left) itr->left = new Node<T>{elt, weight, 0, 0, itr, 0, 0};
-			else itr->right = new Node<T>{elt, weight, 0, 0, itr, 0, 0};
+			if(itr->datum > elt)
+				left = true;
+			else
+				left = false;
+			while((left && itr->left) || (!left && itr->right)) {
+				if(left)
+					itr = itr->left;
+				else
+					itr = itr->right;
+				if(itr->datum > elt) {
+					left = true;
+					if(itr->left && itr->left->datum == elt) {
+						break;
+					}
+				}
+				else {
+					left = false;
+					if(itr->right && itr->right->datum == elt) {
+						break;
+					}
+				}
+			}
+			if(left && itr->left && itr->left->datum == elt) {
+				itr = itr->left;
+				itr->weights.push_back(weight);
+				itr->totalWeight += weight;
+			} else if(!left && itr->right && itr->right->datum == elt) {
+				itr = itr->right;
+				itr->weights.push_back(weight);
+				itr->totalWeight += weight;
+			} else {
+				Node<T>* toAdd = new Node<T>;
+				toAdd->datum = elt;
+				toAdd->totalWeight = weight;
+				toAdd->weights.push_back(weight);
+				toAdd->parent = itr;
+				if(left)
+					itr->left = toAdd;
+				else
+					itr->right = toAdd;
+			}
 			fixUp(itr);
 		}
 
@@ -59,21 +100,21 @@ class Tree {
 		}
 
 		int size() {
-			return 1 + this->root->rightSubtreeSize + this->root->leftSubtreeSize;
+			return this->root->totalWeight + this->root->rightSubtreeSize + this->root->leftSubtreeSize;
 		}
 
 		T& median() {
 			Node<T>* itr = root;
-		    double sum = itr->leftSubtreeSize + itr->rightSubtreeSize + itr->weight;
+		    double sum = itr->leftSubtreeSize + itr->rightSubtreeSize + itr->totalWeight;
 		    double leftElts = 0, rightElts = 0;
-		    while(leftElts + itr->leftSubtreeSize >= sum/2 || rightElts + itr->rightSubtreeSize > sum/2) {
+		    while(leftElts + itr->leftSubtreeSize > sum/2 || rightElts + itr->rightSubtreeSize > sum/2) {
 		    	//std::cout << sum << " " << leftElts + itr->leftSubtreeSize << " " << rightElts + itr->rightSubtreeSize << std::endl;
 		        if((leftElts + itr->leftSubtreeSize) < sum/2) {
-		            leftElts += itr->weight + itr->leftSubtreeSize;
+		            leftElts += itr->totalWeight + itr->leftSubtreeSize;
 		            itr = itr->right;
 		        }
 		        else {
-		            rightElts += itr->weight + itr->rightSubtreeSize;
+		            rightElts += itr->totalWeight + itr->rightSubtreeSize;
 		            itr = itr->left;
 		        }
 		    }
@@ -85,23 +126,40 @@ class Tree {
 		Node<T>* root;
 
 		void fixUp(Node<T>* node) {
-			if(node->left)
-				node->leftSubtreeSize = node->left->weight + node->left->leftSubtreeSize + node->left->rightSubtreeSize;
-			if(node->right)
-				node->rightSubtreeSize = node->right->weight + node->right->leftSubtreeSize + node->right->rightSubtreeSize;
-			if(node == root)
-				return;
-			else
-				fixUp(node->parent);
+			while(node) {
+				if(node->left)
+					node->leftSubtreeSize = node->left->totalWeight + node->left->leftSubtreeSize + node->left->rightSubtreeSize;
+				if(node->right)
+					node->rightSubtreeSize = node->right->totalWeight + node->right->leftSubtreeSize + node->right->rightSubtreeSize;
+				node = node->parent;
+			}
 		}
 
 		void print_h(Node<T>* n, int t) {
 			if(!n) return;
-			if(t == 0) std::cout << n->datum << " ";
+			if(t == 0) {
+				std::cout << n->datum << ":{";
+				for(int i = 0; i < n->weights.size(); ++i) {
+					std::cout << n->weights[i] << " ";
+				}
+				std::cout << "} ";
+			}
 			print_h(n->left, t);
-			if(t == 1) std::cout << n->datum << " ";
+			if(t == 1) {
+				std::cout << n->datum << ":{";
+				for(int i = 0; i < n->weights.size(); ++i) {
+					std::cout << n->weights[i] << " ";
+				}
+				std::cout << "} ";
+			}
 			print_h(n->right, t);
-			if(t == 2) std::cout << n->datum << " ";
+			if(t == 2)  {
+				std::cout << n->datum << ":{";
+				for(int i = 0; i < n->weights.size(); ++i) {
+					std::cout << n->weights[i] << " ";
+				}
+				std::cout << "} ";
+			}
 		}
 
 		void destroy_node(Node<T>* node) {

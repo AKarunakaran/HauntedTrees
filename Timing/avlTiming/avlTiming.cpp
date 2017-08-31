@@ -17,7 +17,7 @@ struct dataPoint {
 	int value;
 };
 
-void generateData(vector<dataPoint>& data, bool weighted) {
+/*void generateData(vector<dataPoint>& data, bool weighted) {
 	if(weighted) {
 		for(int i = 1; i < data.size(); ++i) {
 			if(i % 50 == 0)
@@ -32,6 +32,19 @@ void generateData(vector<dataPoint>& data, bool weighted) {
 				data[i].value = 2*(i-25) + ((rand() % 7) - 3);
 			else
 				data[i].value = 2*i + ((rand() % 7) - 3);
+		}
+	}
+}*/
+
+void generateData(vector<dataPoint>& data, bool weighted) {
+	if(weighted) {
+		for(int i = 1; i < data.size(); ++i) {
+			data[i].value = (rand() % 100) + i/500;
+			data[i].weight = 3*((double) rand() / (double) (RAND_MAX + 1.));
+		}
+	} else {
+		for(int i = 1; i < data.size(); ++i) {
+			data[i].value = (rand() % 100) + i/500;
 		}
 	}
 }
